@@ -16,7 +16,7 @@ module load opencv/4.10.0
 VENV="$HOME/projects/def-jic823/universal-ner/.venv"
 REPO_DIR="$HOME/projects/def-jic823/universal_ner"
 
-python3 -m venv "$VENV"
+python3 -m venv --system-site-packages "$VENV"
 source "$VENV/bin/activate"
 
 python -m pip install -U pip setuptools wheel
