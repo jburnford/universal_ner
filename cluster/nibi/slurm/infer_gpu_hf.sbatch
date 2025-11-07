@@ -28,6 +28,9 @@ export HF_HOME=$HOME/projects/def-jic823/.cache/huggingface
 export TRANSFORMERS_CACHE=$HF_HOME
 mkdir -p "$HF_HOME"
 
+# Ensure we run from the repo root (submission dir)
+cd "$SLURM_SUBMIT_DIR"
+
 python - << 'PY'
 import torch
 print("Torch:", torch.__version__)
@@ -41,4 +44,3 @@ python -m src.serve.hf \
   --model_path Universal-NER/UniNER-7B-type \
   --tensor_parallel_size 1 \
   --max_input_length 512
-
