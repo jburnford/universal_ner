@@ -18,24 +18,20 @@ Clone and prepare the repo on Nibi
    - `git clone <YOUR_GITHUB_REPO_URL>.git universal-ner`
    - `cd universal-ner`
 
-Create a Conda/Mamba environment
-- If micromamba is available (recommended):
-  - `module load python/3.10 2>/dev/null || true`
-  - `micromamba create -y -n uniner -f cluster/nibi/env/environment.yml`
-  - `micromamba activate uniner`
-  - `python -m pip install -U pip`
-  - Install PyTorch per your GPU/CUDA (examples):
-    - GPU (CUDA 12.1): `pip install --index-url https://download.pytorch.org/whl/cu121 torch torchvision torchaudio`
-    - GPU (CUDA 11.8): `pip install --index-url https://download.pytorch.org/whl/cu118 torch torchvision torchaudio`
-    - CPU only: `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu`
-  - Install the repo (editable dev mode if you plan to change code):
-    - `pip install -e .`
+Environments (pick one per task)
+- Inference/Evaluation (vLLM):
+  - micromamba: `micromamba create -y -n uniner-infer -f cluster/nibi/env/infer.yml && micromamba activate uniner-infer`
+  - conda: `conda env create -n uniner-infer -f cluster/nibi/env/infer.yml && conda activate uniner-infer`
+  - Install PyTorch matching Nibi’s CUDA:
+    - CUDA 12.1: `pip install --index-url https://download.pytorch.org/whl/cu121 torch torchvision torchaudio`
+    - CUDA 11.8: `pip install --index-url https://download.pytorch.org/whl/cu118 torch torchvision torchaudio`
+    - CPU only: `pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision torchaudio`
+  - Then install the repo (editable): `pip install -e .`
 
-- If using Anaconda/Miniconda modules instead:
-  - `module load python/3.10 2>/dev/null || true`
-  - `conda env create -n uniner -f cluster/nibi/env/environment.yml`
-  - `conda activate uniner`
-  - Install PyTorch as above, then `pip install -e .`
+- Training (FastChat-based):
+  - micromamba: `micromamba create -y -n uniner-train -f cluster/nibi/env/train.yml && micromamba activate uniner-train`
+  - conda: `conda env create -n uniner-train -f cluster/nibi/env/train.yml && conda activate uniner-train`
+  - Install PyTorch (same CUDA rules as above), then `pip install -e .`
 
 Hugging Face cache and logs
 - For batch jobs, set caches to a fast local dir to avoid home quota issues:
@@ -45,7 +41,7 @@ Hugging Face cache and logs
   - These exports are already included in the Slurm templates.
 
 Submitting jobs
-- Edit `cluster/nibi/slurm/train_gpu.sbatch` or `infer_cpu.sbatch` to fill in:
+- Edit `cluster/nibi/slurm/train_gpu.sbatch`, `infer_cpu.sbatch`, or `infer_gpu.sbatch` to fill in:
   - `#SBATCH --account=...`, `--partition=...` (or `--qos`), time, memory, GPUs/CPUs.
   - Any Nibi-specific `module load` lines.
   - The final `python ...` command(s) to run your training/inference.
@@ -67,3 +63,12 @@ Troubleshooting
 - Out-of-memory: reduce `batch_size` and/or gradient accum steps; request more `--mem`/`--gres=gpu:*` if available.
 - Permission/quota: move caches (`HF_HOME`, etc.) to `$SLURM_TMPDIR` or `$SCRATCH`.
 
+Dependency summary (from upstream repo)
+- Inference/Eval: `vllm`, `transformers>=4.30.1`, `fire`, `tokenizers>=0.13.1`, `gradio`, `sentencepiece`.
+- Training: `accelerate`, `fastapi`, `gradio==3.23`, `httpx`, `markdown2[all]`, `nh3`, `numpy`,
+  `prompt_toolkit>=3.0.0`, `pydantic`, `requests`, `rich>=10.0.0`, `sentencepiece`, `shortuuid`,
+  `tokenizers>=0.12.1`, `torch` (per CUDA), `transformers>=4.28.0,<4.29.0`, `uvicorn`, `wandb`.
+
+Nibi tips
+- Determine CUDA: inside an interactive GPU node run `nvidia-smi` and `module avail cuda` to choose `cu118` or `cu121` wheels.
+- GCC toolchain: vLLM requires `gcc >= 5` at runtime; if needed, `module load gcc/9` or similar.

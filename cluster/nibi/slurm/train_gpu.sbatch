@@ -47,11 +47,41 @@ fi
 echo "[INFO] Python: $(python --version)"
 echo "[INFO] Torch:  $(python -c 'import torch,sys; print(torch.__version__, torch.cuda.is_available())' || echo 'not installed')"
 
-# TODO: Replace the following placeholder command with the actual training entry point.
-# Examples (edit to match this repo):
-#   python scripts/train.py --config configs/base.yaml
-#   python -m universal_ner.train --config configs/train.yaml
-#
-echo "[ERROR] Edit cluster/nibi/slurm/train_gpu.sbatch to run the correct training command." >&2
-exit 2
+# Training example (FastChat-based, from upstream README)
+# Requires the uniner-train environment and a compatible Torch+CUDA install.
+# Adjust MODEL/DATA paths, world size, and hyperparameters as needed.
 
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-8}
+MODEL=yahma/llama-7b-hf
+DATA=./src/train/playground/data/ner.json
+
+mkdir -p saved_models
+torchrun --nproc_per_node=1 --master_port=20001 src/train/fastchat/train/train_mem.py \
+    --model_name_or_path ${MODEL}  \
+    --data_path ${DATA} \
+    --run_name universalner \
+    --bf16 True \
+    --output_dir saved_models/universalner \
+    --dataloader_num_workers 8 \
+    --num_train_epochs 1 \
+    --per_device_train_batch_size 2 \
+    --per_device_eval_batch_size 4 \
+    --gradient_accumulation_steps 16 \
+    --evaluation_strategy "steps" \
+    --eval_steps 5000 \
+    --save_strategy "steps" \
+    --save_steps 5000 \
+    --save_total_limit 2 \
+    --learning_rate 2e-5 \
+    --weight_decay 0. \
+    --warmup_ratio 0.04 \
+    --lr_scheduler_type "cosine" \
+    --logging_steps 1 \
+    --fsdp "full_shard auto_wrap" \
+    --fsdp_config src/train/fsdp_config.json \
+    --tf32 True \
+    --model_max_length 1024 \
+    --gradient_checkpointing True \
+    --lazy_preprocess True
+
+echo "[INFO] Training job completed at $(date)"

@@ -1,0 +1,15 @@
+name: uniner-infer
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pyyaml
+  - pip:
+      - vllm
+      - transformers>=4.30.1
+      - tokenizers>=0.13.1
+      - sentencepiece
+      - fire
+      - gradio
