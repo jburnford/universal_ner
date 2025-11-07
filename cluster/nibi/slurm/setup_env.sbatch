@@ -22,6 +22,14 @@ python -m pip install -U pip setuptools wheel
 python -m pip install --index-url https://download.pytorch.org/whl/cu124 torch torchvision torchaudio
 
 cd "$REPO_DIR"
+# Base repo install
 python -m pip install -e .
+
+# Ensure HF inference deps are present (common crash point: missing sentencepiece)
+python -m pip install \
+  transformers>=4.30.1 \
+  tokenizers>=0.13.1 \
+  sentencepiece \
+  fire
 
 echo "[SETUP DONE] Venv: $VENV"
