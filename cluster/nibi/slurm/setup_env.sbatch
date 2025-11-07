@@ -11,6 +11,7 @@ set -euo pipefail
 module load python/3.12
 module load cuda/12.2
 module load gcc arrow/18.1.0
+module load opencv/4.10.0
 
 VENV="$HOME/projects/def-jic823/universal-ner/.venv"
 REPO_DIR="$HOME/projects/def-jic823/universal_ner"
