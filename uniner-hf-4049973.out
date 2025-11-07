@@ -1,0 +1,5 @@
+Torch: 2.9.0
+CUDA available: True
+CUDA runtime: 12.6
+GPU: NVIDIA H100 80GB HBM3
+/home/jic823/projects/def-jic823/universal-ner/.venv/bin/python: Error while finding module specification for 'src.serve.hf' (ModuleNotFoundError: No module named 'src')

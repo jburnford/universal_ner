@@ -1,0 +1,7 @@
+[INFO] Listing .out files in /project/6080182/universal_ner:
+-rw-r----- 1 jic823 def-jic823 4622 Nov  7 14:38 uniner-setup-4049646.out
+-rw-r----- 1 jic823 def-jic823  250 Nov  7 14:44 uniner-hf-4049973.out
+-rw-r----- 1 jic823 def-jic823  320 Nov  7 14:50 uniner-collect-4050691.out
+-rw-r----- 1 jic823 def-jic823  336 Nov  7 14:56 uniner-collect-4051906.out
+-rw-r----- 1 jic823 def-jic823  250 Nov  7 14:56 uniner-hf-4051867.out
+-rw-r----- 1 jic823 def-jic823   61 Nov  7 15:09 uniner-pushlogs-4054056.out

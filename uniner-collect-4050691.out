@@ -1,0 +1,6 @@
+[main 6eaab45] Add HF inference log for job 4049973
+ 1 file changed, 5 insertions(+)
+ create mode 100644 cluster/nibi/logs/uniner-hf-4049973.out
+To github.com:jburnford/universal_ner.git
+   9ae856c..6eaab45  main -> main
+[COLLECTED] /project/6080182/universal_ner/cluster/nibi/logs/uniner-hf-4049973.out pushed to repo.
