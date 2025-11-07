@@ -31,7 +31,10 @@ export TRANSFORMERS_CACHE=${HF_HOME}
 export HF_DATASETS_CACHE=${HF_HOME}/datasets
 mkdir -p "$HF_HOME" "$HF_DATASETS_CACHE"
 
-cd "$SLURM_SUBMIT_DIR"
+# Ensure we run from the repo root
+REPO_DIR="$HOME/projects/def-jic823/universal_ner"
+cd "$REPO_DIR"
+export PYTHONPATH="$REPO_DIR:$PYTHONPATH"
 
 # TODO: Replace with the actual inference entry point and args.
 # Examples:

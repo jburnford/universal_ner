@@ -39,8 +39,10 @@ export HF_DATASETS_CACHE=${HF_HOME}/datasets
 export MPLCONFIGDIR=${SLURM_TMPDIR:-${TMPDIR:-/tmp}}/mpl
 mkdir -p "$HF_HOME" "$HF_DATASETS_CACHE" "$MPLCONFIGDIR"
 
-# Move to repo root (this script is typically launched from repo root)
-cd "$SLURM_SUBMIT_DIR"
+# Move to repo root
+REPO_DIR="$HOME/projects/def-jic823/universal_ner"
+cd "$REPO_DIR"
+export PYTHONPATH="$REPO_DIR:$PYTHONPATH"
 
 # Sanity: show GPU/driver
 if command -v nvidia-smi >/dev/null 2>&1; then
