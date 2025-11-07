@@ -1,0 +1,27 @@
+name: uniner
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - setuptools
+  - wheel
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - tqdm
+  - pyyaml
+  - requests
+  - ujson
+  - pip:
+      # PyTorch is intentionally omitted here; install the right build for Nibi's CUDA via pip after activation.
+      # Universal NER project dependencies installed via editable mode: `pip install -e .`
+      - transformers
+      - datasets
+      - evaluate
+      - accelerate
+      - sentencepiece
+      - pytorch-lightning
+      - tensorboard
+      - wandb
