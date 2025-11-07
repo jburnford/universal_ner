@@ -24,6 +24,6 @@ python -m pip install --index-url https://download.pytorch.org/whl/cu124 torch t
 
 cd "$REPO_DIR"
 # Install only dependencies needed for HF inference (skip vllm to avoid opencv issues)
-python -m pip install transformers>=4.30.1 tokenizers>=0.13.1 fire sentencepiece accelerate
+python -m pip install numpy transformers>=4.30.1 tokenizers>=0.13.1 fire sentencepiece accelerate
 
 echo "[SETUP DONE] Venv: $VENV"
