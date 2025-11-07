@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=uniner-train
-#SBATCH --account=<YOUR_ACCOUNT>
+#SBATCH --account=def-jic823
 #SBATCH --partition=<GPU_PARTITION>
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
@@ -14,16 +14,19 @@ echo "[INFO] CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-unset}"
 
 # Optional: load site-specific modules (edit as needed)
 module purge || true
-# module load cuda/12.1 cudnn/8.9  # example; adjust to Nibi
-# module load python/3.10           # if using system python modules
+module load python/3.12
+module load cuda/12.2
+module load gcc arrow/18.1.0
 
 # Activate conda/mamba environment (choose one)
 if command -v micromamba >/dev/null 2>&1; then
   eval "$(micromamba shell hook --shell bash)"
-  micromamba activate uniner
+  micromamba activate uniner-train
 elif command -v conda >/dev/null 2>&1; then
   eval "$(conda shell.bash hook)"
-  conda activate uniner
+  conda activate uniner-train
+elif [ -f "$HOME/projects/def-jic823/universal-ner/.venv/bin/activate" ]; then
+  source "$HOME/projects/def-jic823/universal-ner/.venv/bin/activate"
 else
   echo "[ERROR] No conda/micromamba found in PATH." >&2
   exit 1

@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=uniner-infer
-#SBATCH --account=<YOUR_ACCOUNT>
+#SBATCH --account=def-jic823
 #SBATCH --partition=<CPU_PARTITION>
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
@@ -11,7 +11,7 @@ set -euo pipefail
 echo "[INFO] Job $SLURM_JOBID on $(hostname) started at $(date)"
 
 module purge || true
-# module load python/3.10  # if needed
+module load python/3.12
 
 if command -v micromamba >/dev/null 2>&1; then
   eval "$(micromamba shell hook --shell bash)"
@@ -19,6 +19,8 @@ if command -v micromamba >/dev/null 2>&1; then
 elif command -v conda >/dev/null 2>&1; then
   eval "$(conda shell.bash hook)"
   conda activate uniner
+elif [ -f "$HOME/projects/def-jic823/universal-ner/.venv/bin/activate" ]; then
+  source "$HOME/projects/def-jic823/universal-ner/.venv/bin/activate"
 else
   echo "[ERROR] No conda/micromamba found in PATH." >&2
   exit 1
@@ -38,4 +40,3 @@ cd "$SLURM_SUBMIT_DIR"
 #
 echo "[ERROR] Edit cluster/nibi/slurm/infer_cpu.sbatch to run the correct inference command." >&2
 exit 2
-
