@@ -15,6 +15,50 @@ from transformers import pipeline
 sys.path.insert(0, '/project/6080182/universal_ner')
 from src.utils import preprocess_instance
 
+def chunk_text_by_paragraphs(text, target_size=2000, overlap=200):
+    """
+    Chunk text at paragraph boundaries.
+
+    Args:
+        text: Input text to chunk
+        target_size: Target size for each chunk (characters)
+        overlap: Number of characters to overlap between chunks
+
+    Returns:
+        List of text chunks
+    """
+    # Split on double newlines (paragraph breaks)
+    paragraphs = text.split('\n\n')
+
+    chunks = []
+    current_chunk = []
+    current_size = 0
+
+    for para in paragraphs:
+        para_size = len(para)
+
+        # If adding this paragraph would exceed target, save current chunk
+        if current_size > 0 and current_size + para_size > target_size:
+            chunks.append('\n\n'.join(current_chunk))
+
+            # Start new chunk with overlap (keep last paragraph for context)
+            if overlap > 0 and current_chunk:
+                current_chunk = [current_chunk[-1]]
+                current_size = len(current_chunk[0])
+            else:
+                current_chunk = []
+                current_size = 0
+
+        current_chunk.append(para)
+        current_size += para_size + 2  # +2 for \n\n
+
+    # Add final chunk
+    if current_chunk:
+        chunks.append('\n\n'.join(current_chunk))
+
+    return chunks
+
+
 def extract_entities(generator, text, entity_types, max_new_tokens=256):
     """Extract entities of specified types from text."""
     results = {}
@@ -43,6 +87,32 @@ def extract_entities(generator, text, entity_types, max_new_tokens=256):
             results[entity_type] = result
 
     return results
+
+
+def merge_entity_results(entity_lists):
+    """
+    Merge entity results from multiple chunks, removing duplicates.
+
+    Args:
+        entity_lists: List of entity dictionaries
+
+    Returns:
+        Merged entity dictionary with unique entities
+    """
+    merged = {}
+
+    for entities in entity_lists:
+        for entity_type, entity_list in entities.items():
+            if entity_type not in merged:
+                merged[entity_type] = []
+
+            if isinstance(entity_list, list):
+                # Add unique entities only
+                for entity in entity_list:
+                    if entity not in merged[entity_type]:
+                        merged[entity_type].append(entity)
+
+    return merged
 
 
 def main(
@@ -102,27 +172,38 @@ def main(
         print(f"\n[PAGE {i+1}/{len(pages)}] ID: {page_id}")
         print(f"Text length: {len(text)} characters")
 
-        # If text is too long, chunk it
-        if len(text) > chunk_size:
-            print(f"[WARN] Text too long ({len(text)} chars), processing first {chunk_size} chars only")
-            text = text[:chunk_size]
+        # Chunk text at paragraph boundaries
+        chunks = chunk_text_by_paragraphs(text, target_size=chunk_size, overlap=200)
+        print(f"Split into {len(chunks)} chunks (target: {chunk_size} chars/chunk)")
 
-        # Extract entities
-        entities = extract_entities(generator, text, entity_types_list, max_new_tokens)
+        # Process each chunk
+        chunk_entities = []
+        for chunk_idx, chunk in enumerate(chunks):
+            print(f"  Processing chunk {chunk_idx+1}/{len(chunks)} ({len(chunk)} chars)...", end=' ')
+            entities = extract_entities(generator, chunk, entity_types_list, max_new_tokens)
+            chunk_entities.append(entities)
 
-        # Print results
-        total_entities = sum(len(v) if isinstance(v, list) else 0 for v in entities.values())
-        print(f"Extracted {total_entities} entities:")
-        for etype, ents in entities.items():
+            # Print chunk results
+            total = sum(len(v) if isinstance(v, list) else 0 for v in entities.values())
+            print(f"{total} entities")
+
+        # Merge entities from all chunks
+        merged_entities = merge_entity_results(chunk_entities)
+
+        # Print final results
+        total_entities = sum(len(v) if isinstance(v, list) else 0 for v in merged_entities.values())
+        print(f"Total unique entities: {total_entities}")
+        for etype, ents in merged_entities.items():
             if isinstance(ents, list) and ents:
-                print(f"  {etype}: {len(ents)} - {ents[:3]}{'...' if len(ents) > 3 else ''}")
+                print(f"  {etype}: {len(ents)} - {ents[:5]}{'...' if len(ents) > 5 else ''}")
 
         # Store result
         results.append({
             'id': page_id,
             'text': page.get('text', ''),
-            'entities': entities,
-            'metadata': page.get('metadata', {})
+            'entities': merged_entities,
+            'metadata': page.get('metadata', {}),
+            'num_chunks': len(chunks)
         })
 
     # Save results
