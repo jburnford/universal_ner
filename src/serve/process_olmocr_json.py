@@ -67,7 +67,10 @@ def main(
         chunk_size: Maximum characters per text chunk for NER
     """
     # Parse entity types
-    entity_types_list = [et.strip() for et in entity_types.split(',')]
+    if isinstance(entity_types, (list, tuple)):
+        entity_types_list = list(entity_types)
+    else:
+        entity_types_list = [et.strip() for et in entity_types.split(',')]
 
     # Set output file
     if output_file is None:
