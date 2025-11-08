@@ -59,16 +59,31 @@ def chunk_text_by_paragraphs(text, target_size=2000, overlap=200):
     return chunks
 
 
-def extract_entities(generator, text, entity_types, max_new_tokens=256):
+def extract_entities(generator, text, entity_types, max_new_tokens=256, use_enhanced_descriptions=False):
     """Extract entities of specified types from text."""
+
+    # Enhanced entity type descriptions for better recall
+    enhanced_descriptions = {
+        "person": "individuals, historical figures, officials, traders, explorers, captains, or named persons including titles and honorifics",
+        "location": "places, settlements, geographic locations, forts, trading posts, rivers, bays, straits, territories, or regions",
+        "organization": "companies, trading corporations, governmental bodies, colonial organizations, administrative offices, institutional entities, ships, missionary stations, or chartered companies",
+        "date": "specific dates, years, months, or time periods with numerical indicators"
+    }
+
     results = {}
 
     for entity_type in entity_types:
+        # Use enhanced description if enabled, otherwise use simple type name
+        if use_enhanced_descriptions and entity_type in enhanced_descriptions:
+            type_description = enhanced_descriptions[entity_type]
+        else:
+            type_description = entity_type
+
         example = {
             "conversations": [
                 {"from": "human", "value": f"Text: {text}"},
                 {"from": "gpt", "value": "I've read this text."},
-                {"from": "human", "value": f"What describes {entity_type} in the text?"},
+                {"from": "human", "value": f"What describes {type_description} in the text?"},
                 {"from": "gpt", "value": "[]"}
             ]
         }
@@ -123,6 +138,7 @@ def main(
     max_new_tokens: int = 256,
     max_pages: int = None,
     chunk_size: int = 2000,
+    use_enhanced_descriptions: bool = False,
 ):
     """
     Process OLMoCR JSON file with Universal-NER.
@@ -180,7 +196,7 @@ def main(
         chunk_entities = []
         for chunk_idx, chunk in enumerate(chunks):
             print(f"  Processing chunk {chunk_idx+1}/{len(chunks)} ({len(chunk)} chars)...", end=' ')
-            entities = extract_entities(generator, chunk, entity_types_list, max_new_tokens)
+            entities = extract_entities(generator, chunk, entity_types_list, max_new_tokens, use_enhanced_descriptions)
             chunk_entities.append(entities)
 
             # Print chunk results

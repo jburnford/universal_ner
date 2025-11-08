@@ -31,8 +31,9 @@ INPUT_FILE="${INPUT_FILE:-$HOME/projects/def-jic823/olmocr_test/P000837.json}"
 OUTPUT_FILE="${OUTPUT_FILE:-$HOME/projects/def-jic823/olmocr_test/P000837.ner.json}"
 ENTITY_TYPES="${ENTITY_TYPES:-person,location,organization,date}"
 MAX_PAGES="${MAX_PAGES:-1}"
-CHUNK_SIZE="${CHUNK_SIZE:-3000}"
+CHUNK_SIZE="${CHUNK_SIZE:-2000}"
 MAX_NEW_TOKENS="${MAX_NEW_TOKENS:-512}"
+USE_ENHANCED="${USE_ENHANCED:-false}"
 
 echo ""
 echo "========================================="
@@ -43,18 +44,31 @@ echo "Output: $OUTPUT_FILE"
 echo "Entity types: $ENTITY_TYPES"
 echo "Max pages: $MAX_PAGES"
 echo "Chunk size: $CHUNK_SIZE chars"
+echo "Enhanced descriptions: $USE_ENHANCED"
 echo "========================================="
 echo ""
 
 # Run processing script
-python -m src.serve.process_olmocr_json \
-  --input_file "$INPUT_FILE" \
-  --output_file "$OUTPUT_FILE" \
-  --model_path Universal-NER/UniNER-7B-type \
-  --entity_types "$ENTITY_TYPES" \
-  --max_pages "$MAX_PAGES" \
-  --max_new_tokens "$MAX_NEW_TOKENS" \
-  --chunk_size "$CHUNK_SIZE"
+if [ "$USE_ENHANCED" = "true" ]; then
+  python -m src.serve.process_olmocr_json \
+    --input_file "$INPUT_FILE" \
+    --output_file "$OUTPUT_FILE" \
+    --model_path Universal-NER/UniNER-7B-type \
+    --entity_types "$ENTITY_TYPES" \
+    --max_pages "$MAX_PAGES" \
+    --max_new_tokens "$MAX_NEW_TOKENS" \
+    --chunk_size "$CHUNK_SIZE" \
+    --use_enhanced_descriptions
+else
+  python -m src.serve.process_olmocr_json \
+    --input_file "$INPUT_FILE" \
+    --output_file "$OUTPUT_FILE" \
+    --model_path Universal-NER/UniNER-7B-type \
+    --entity_types "$ENTITY_TYPES" \
+    --max_pages "$MAX_PAGES" \
+    --max_new_tokens "$MAX_NEW_TOKENS" \
+    --chunk_size "$CHUNK_SIZE"
+fi
 
 echo ""
 echo "[DONE] Processing completed at $(date)"
