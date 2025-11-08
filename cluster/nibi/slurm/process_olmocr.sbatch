@@ -29,8 +29,9 @@ export PYTHONPATH="$REPO_DIR:$PYTHONPATH"
 # Default input/output paths (can be overridden via command line)
 INPUT_FILE="${INPUT_FILE:-$HOME/projects/def-jic823/olmocr_test/P000837.json}"
 OUTPUT_FILE="${OUTPUT_FILE:-$HOME/projects/def-jic823/olmocr_test/P000837.ner.json}"
-ENTITY_TYPES="${ENTITY_TYPES:-person,location,organization,date,role}"
+ENTITY_TYPES="${ENTITY_TYPES:-person,location,organization,date}"
 MAX_PAGES="${MAX_PAGES:-1}"
+CHUNK_SIZE="${CHUNK_SIZE:-10000}"
 
 echo ""
 echo "========================================="
@@ -40,6 +41,7 @@ echo "Input:  $INPUT_FILE"
 echo "Output: $OUTPUT_FILE"
 echo "Entity types: $ENTITY_TYPES"
 echo "Max pages: $MAX_PAGES"
+echo "Chunk size: $CHUNK_SIZE chars"
 echo "========================================="
 echo ""
 
@@ -51,7 +53,7 @@ python -m src.serve.process_olmocr_json \
   --entity_types "$ENTITY_TYPES" \
   --max_pages "$MAX_PAGES" \
   --max_new_tokens 256 \
-  --chunk_size 2000
+  --chunk_size "$CHUNK_SIZE"
 
 echo ""
 echo "[DONE] Processing completed at $(date)"
