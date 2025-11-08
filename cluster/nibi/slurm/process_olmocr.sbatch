@@ -32,6 +32,7 @@ OUTPUT_FILE="${OUTPUT_FILE:-$HOME/projects/def-jic823/olmocr_test/P000837.ner.js
 ENTITY_TYPES="${ENTITY_TYPES:-person,location,organization,date}"
 MAX_PAGES="${MAX_PAGES:-1}"
 CHUNK_SIZE="${CHUNK_SIZE:-10000}"
+MAX_NEW_TOKENS="${MAX_NEW_TOKENS:-512}"
 
 echo ""
 echo "========================================="
@@ -52,7 +53,7 @@ python -m src.serve.process_olmocr_json \
   --model_path Universal-NER/UniNER-7B-type \
   --entity_types "$ENTITY_TYPES" \
   --max_pages "$MAX_PAGES" \
-  --max_new_tokens 256 \
+  --max_new_tokens "$MAX_NEW_TOKENS" \
   --chunk_size "$CHUNK_SIZE"
 
 echo ""
