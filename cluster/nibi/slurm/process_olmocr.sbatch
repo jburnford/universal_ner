@@ -31,7 +31,7 @@ INPUT_FILE="${INPUT_FILE:-$HOME/projects/def-jic823/olmocr_test/P000837.json}"
 OUTPUT_FILE="${OUTPUT_FILE:-$HOME/projects/def-jic823/olmocr_test/P000837.ner.json}"
 ENTITY_TYPES="${ENTITY_TYPES:-person,location,organization,date}"
 MAX_PAGES="${MAX_PAGES:-1}"
-CHUNK_SIZE="${CHUNK_SIZE:-4000}"
+CHUNK_SIZE="${CHUNK_SIZE:-3000}"
 MAX_NEW_TOKENS="${MAX_NEW_TOKENS:-512}"
 
 echo ""
