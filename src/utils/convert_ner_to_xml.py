@@ -67,7 +67,7 @@ def build_sorted_mentions(all_entities):
     return mentions_list
 
 
-def get_nearby_entities_optimized(sorted_mentions, char_offset, window=500):
+def get_nearby_entities_optimized(sorted_mentions, char_offset, window=200):
     """
     Find other entities mentioned within window characters using binary search.
 
@@ -77,7 +77,7 @@ def get_nearby_entities_optimized(sorted_mentions, char_offset, window=500):
     Args:
         sorted_mentions: Sorted list of (start_pos, entity_type, entity_name) tuples
         char_offset: Character position of current mention
-        window: Window size in characters (default 500)
+        window: Window size in characters (default 200)
 
     Returns:
         Dict of entity_type -> list of entity names
@@ -237,10 +237,10 @@ def process_toponym_file(ner_file, output_dir, entity_types=None):
                 mention_elem.set("char_start", str(mention['start']))
                 mention_elem.set("char_end", str(mention['end']))
 
-                nearby = get_nearby_entities_optimized(sorted_mentions, mention['start'], window=500)
+                nearby = get_nearby_entities_optimized(sorted_mentions, mention['start'], window=200)
                 if nearby:
                     nearby_elem = ET.SubElement(mention_elem, "nearby_entities")
-                    nearby_elem.set("window_chars", "500")
+                    nearby_elem.set("window_chars", "200")
 
                     for nearby_type, nearby_names in sorted(nearby.items()):
                         if nearby_names:
