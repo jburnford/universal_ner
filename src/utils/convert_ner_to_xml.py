@@ -23,6 +23,7 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from collections import defaultdict
+import bisect
 
 
 def find_entity_mentions(text, entity):
@@ -49,14 +50,33 @@ def find_entity_mentions(text, entity):
     return mentions
 
 
-def get_nearby_entities(all_entities, char_offset, text, window=500):
+def build_sorted_mentions(all_entities):
     """
-    Find other entities mentioned within window characters of this mention.
+    Build a flat list of all mentions sorted by position for efficient window queries.
+
+    Returns:
+        List of (start_pos, entity_type, entity_name) tuples sorted by start_pos
+    """
+    mentions_list = []
+    for entity_type, entities_dict in all_entities.items():
+        for entity_name, mentions in entities_dict.items():
+            for mention in mentions:
+                mentions_list.append((mention['start'], entity_type, entity_name))
+
+    mentions_list.sort(key=lambda x: x[0])
+    return mentions_list
+
+
+def get_nearby_entities_optimized(sorted_mentions, char_offset, window=500):
+    """
+    Find other entities mentioned within window characters using binary search.
+
+    This is O(log n + k) where k is mentions in window, vs O(n*m) for naive approach.
+    For 36K mentions, this is ~15 comparisons + window size vs 1.3 billion!
 
     Args:
-        all_entities: Dict of entity_type -> entity_name -> mentions
+        sorted_mentions: Sorted list of (start_pos, entity_type, entity_name) tuples
         char_offset: Character position of current mention
-        text: Full document text
         window: Window size in characters (default 500)
 
     Returns:
@@ -64,15 +84,22 @@ def get_nearby_entities(all_entities, char_offset, text, window=500):
     """
     nearby = defaultdict(list)
     window_start = max(0, char_offset - window)
-    window_end = min(len(text), char_offset + window)
+    window_end = char_offset + window
 
-    for entity_type, entities_dict in all_entities.items():
-        for entity_name, mentions in entities_dict.items():
-            for mention in mentions:
-                if window_start <= mention['start'] <= window_end:
-                    if mention['start'] != char_offset:
-                        nearby[entity_type].append(entity_name)
-                        break
+    # Use binary search to find first mention in window
+    start_idx = bisect.bisect_left(sorted_mentions, (window_start, '', ''))
+
+    # Scan forward until outside window
+    seen_entities = defaultdict(set)  # Track which entities we've already added
+    for i in range(start_idx, len(sorted_mentions)):
+        pos, entity_type, entity_name = sorted_mentions[i]
+
+        if pos > window_end:
+            break  # Outside window, stop scanning
+
+        if pos != char_offset and entity_name not in seen_entities[entity_type]:
+            nearby[entity_type].append(entity_name)
+            seen_entities[entity_type].add(entity_name)
 
     return nearby
 
@@ -157,6 +184,10 @@ def process_toponym_file(ner_file, output_dir, entity_types=None):
 
     paragraphs = split_into_paragraphs(full_text)
 
+    # Build sorted mention list once for efficient nearby entity queries
+    # This is O(m log m) once, vs O(n*m) per mention without optimization
+    sorted_mentions = build_sorted_mentions(all_entities)
+
     # Build XML
     root = ET.Element("document")
     root.set("id", doc_id)
@@ -206,7 +237,7 @@ def process_toponym_file(ner_file, output_dir, entity_types=None):
                 mention_elem.set("char_start", str(mention['start']))
                 mention_elem.set("char_end", str(mention['end']))
 
-                nearby = get_nearby_entities(all_entities, mention['start'], full_text, window=500)
+                nearby = get_nearby_entities_optimized(sorted_mentions, mention['start'], window=500)
                 if nearby:
                     nearby_elem = ET.SubElement(mention_elem, "nearby_entities")
                     nearby_elem.set("window_chars", "500")
