@@ -168,7 +168,13 @@ def process_file(
     with open(input_file) as f:
         data = json.load(f)
 
-    entity_types_list = [t.strip() for t in entity_types.split(',')]
+    # Handle entity_types as either string or tuple (Fire parsing)
+    if isinstance(entity_types, str):
+        entity_types_list = [t.strip() for t in entity_types.split(',')]
+    elif isinstance(entity_types, (list, tuple)):
+        entity_types_list = list(entity_types)
+    else:
+        entity_types_list = [entity_types]
 
     print(f"Processing {len(data)} pages...")
     print(f"Entity types: {', '.join(entity_types_list)}")
