@@ -16,8 +16,8 @@ Or import as a module:
     from src.utils.convert_ner_to_xml import process_toponym_file, batch_convert
 """
 
-import fire
 import json
+import argparse
 import re
 from pathlib import Path
 import xml.etree.ElementTree as ET
@@ -278,4 +278,8 @@ def batch_convert(input_dir, output_dir, entity_types=None):
 
 
 if __name__ == "__main__":
-    fire.Fire(batch_convert)
+    parser = argparse.ArgumentParser(description="Convert NER JSON files to structured XML")
+    parser.add_argument("input_dir", help="Directory containing .toponym.ner.json files")
+    parser.add_argument("output_dir", help="Directory for output XML files")
+    args = parser.parse_args()
+    batch_convert(args.input_dir, args.output_dir)
