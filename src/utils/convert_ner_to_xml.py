@@ -81,7 +81,7 @@ def get_paragraph_id(char_offset, paragraphs):
     return -1
 
 
-def process_toponym_file(ner_file, output_dir, entity_types=None):
+def process_toponym_file(ner_file, output_dir, entity_types=None, metadata=None):
     """
     Convert a single toponym NER file to structured XML.
 
@@ -89,6 +89,7 @@ def process_toponym_file(ner_file, output_dir, entity_types=None):
         ner_file: Path to .toponym.ner.json file
         output_dir: Directory for output XML files
         entity_types: List of entity types to process (default: all toponym types)
+        metadata: Optional dict with metadata fields (title, creator, publisher, date, year, language, subject, collection, description)
 
     Returns:
         Tuple of (output_file_path, total_entities, total_mentions)
@@ -139,6 +140,14 @@ def process_toponym_file(ner_file, output_dir, entity_types=None):
 
     root.set("total_entity_count", str(total_entities))
     root.set("total_mention_count", str(total_mentions))
+
+    # Add metadata if provided
+    if metadata:
+        meta_elem = ET.SubElement(root, "metadata")
+        for key, value in metadata.items():
+            if value:  # Only add non-empty metadata fields
+                field_elem = ET.SubElement(meta_elem, key)
+                field_elem.text = str(value)
 
     # Add text element with paragraph structure
     text_elem = ET.SubElement(root, "text")
