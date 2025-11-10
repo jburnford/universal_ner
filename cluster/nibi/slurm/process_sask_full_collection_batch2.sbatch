@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=sask-full-toponym-b2
 #SBATCH --account=def-jic823
-#SBATCH --array=10000-13886%100
+#SBATCH --array=0-3886%100
 #SBATCH --gres=gpu:h100:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
@@ -38,14 +38,15 @@ mkdir -p "$OUTPUT_DIR" "$XML_DIR"
 FILES=($OCR_DIR/*.json)
 TOTAL_FILES=${#FILES[@]}
 
-# Get file for this array task
-INPUT_FILE="${FILES[$SLURM_ARRAY_TASK_ID]}"
+# Get file for this array task (with offset for batch 2)
+FILE_INDEX=$((SLURM_ARRAY_TASK_ID + 10000))
+INPUT_FILE="${FILES[$FILE_INDEX]}"
 BASENAME=$(basename "$INPUT_FILE" .json)
 
 echo "========================================="
-echo "Saskatchewan Full Collection - Toponym NER"
+echo "Saskatchewan Full Collection - Toponym NER (Batch 2)"
 echo "========================================="
-echo "Task: $SLURM_ARRAY_TASK_ID / $TOTAL_FILES"
+echo "Task: $SLURM_ARRAY_TASK_ID (File $FILE_INDEX / $TOTAL_FILES)"
 echo "Document: $BASENAME"
 echo "Input: $INPUT_FILE"
 echo "Output: $OUTPUT_DIR/${BASENAME}.toponym.ner.json"
