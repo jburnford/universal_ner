@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=sask-full-toponym
 #SBATCH --account=def-jic823
-#SBATCH --array=0-9999%200
-#SBATCH --gres=gpu:nvidia_h100_80gb_hbm3_2g.20gb:1
+#SBATCH --array=0-9999%100
+#SBATCH --gres=gpu:h100:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=1:00:00
