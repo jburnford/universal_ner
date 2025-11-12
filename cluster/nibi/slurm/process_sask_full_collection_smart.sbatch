@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=sask-full-toponym
 #SBATCH --account=def-jic823
-#SBATCH --array=0-8541%100
+#SBATCH --array=0-9999%100
 #SBATCH --gres=gpu:h100:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
