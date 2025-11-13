@@ -79,37 +79,4 @@ python -m src.serve.process_olmocr_json_toponyms \
   --use_enhanced_descriptions True
 
 echo ""
-echo "✓ NER completed, converting to XML with metadata..."
-
-# Convert to XML with metadata
-python3 << PYEOF
-import json
-from pathlib import Path
-from src.utils.convert_ner_to_xml import process_toponym_file
-
-# Load metadata
-metadata_file = Path("$METADATA_FILE")
-metadata_db = {}
-if metadata_file.exists():
-    with open(metadata_file) as f:
-        metadata_db = json.load(f)
-
-# Find metadata for this file
-json_path_key = "$INPUT_FILE"
-basename = "$BASENAME"
-
-metadata = None
-for key in metadata_db.keys():
-    if basename in key or key in basename:
-        metadata = metadata_db[key]
-        break
-
-# Convert to XML with metadata
-process_toponym_file(
-    "$OUTPUT_DIR/${BASENAME}.toponym.ner.json",
-    "$XML_DIR/${BASENAME}.toponym.xml",
-    metadata
-)
-PYEOF
-
-echo "✓ Processing complete for $BASENAME"
+echo "✓ NER processing complete for $BASENAME"
