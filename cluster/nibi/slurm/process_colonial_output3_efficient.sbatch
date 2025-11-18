@@ -28,7 +28,7 @@ cd "$REPO_DIR"
 export PYTHONPATH="$REPO_DIR:$PYTHONPATH"
 
 # Input/output directories
-INPUT_BASE="/home/jic823/colonialofficelist/output_3"
+INPUT_BASE="$HOME/projects/def-jic823/colonialofficelist_output_3"
 OUTPUT_DIR="$HOME/projects/def-jic823/colonial_output3_ner"
 BATCH_DIR="$HOME/projects/def-jic823/colonial_batches"
 mkdir -p "$OUTPUT_DIR" "$BATCH_DIR"

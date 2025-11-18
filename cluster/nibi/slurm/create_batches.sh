@@ -1,7 +1,7 @@
 #!/bin/bash
 # Create batch file lists for efficient processing
 
-INPUT_BASE="/home/jic823/colonialofficelist/output_3"
+INPUT_BASE="$HOME/projects/def-jic823/colonialofficelist_output_3"
 BATCH_DIR="$HOME/projects/def-jic823/colonial_batches"
 FILES_PER_BATCH=20
 
